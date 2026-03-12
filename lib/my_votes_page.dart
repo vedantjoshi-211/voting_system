@@ -9,23 +9,57 @@ class MyVotesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const pageTop = Color(0xFF0B1020);
+    const pageMid = Color(0xFF121A3A);
+    const pageBottom = Color(0xFF1B255A);
+
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('My Votes')),
-        body: const Center(child: Text('Please log in to see your votes')),
+        backgroundColor: pageTop,
+        appBar: AppBar(
+          title: const Text('My Votes'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+          titleTextStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+          systemOverlayStyle: SystemUiOverlayStyle.light,
+        ),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [pageTop, pageMid, pageBottom],
+            ),
+          ),
+          child: const Center(
+            child: Text(
+              'Please log in to see your votes',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1020),
+      backgroundColor: pageTop,
       appBar: AppBar(
         title: const Text('My Votes'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
       body: Stack(
@@ -35,7 +69,7 @@ class MyVotesPage extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF0B1020), Color(0xFF121A3A), Color(0xFF1B255A)],
+                colors: [pageTop, pageMid, pageBottom],
               ),
             ),
           ),
@@ -44,12 +78,17 @@ class MyVotesPage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance
-                  .collection('votes')
-                  .where('userId', isEqualTo: user.uid)
-                  .snapshots(),
+                    .collection('votes')
+                    .where('userId', isEqualTo: user.uid)
+                    .snapshots(),
                 builder: (context, snap) {
                   if (snap.hasError) {
-                    return Center(child: Text('Error: ${snap.error}', style: const TextStyle(color: Colors.white70)));
+                    return Center(
+                      child: Text(
+                        'Error: ${snap.error}',
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                    );
                   }
                   if (snap.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -59,12 +98,21 @@ class MyVotesPage extends StatelessWidget {
 
                   // sort client-side by timestamp desc to avoid needing an index
                   docs.sort((a, b) {
-                    final ta = (a.data()['timestamp'] as Timestamp?)?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0);
-                    final tb = (b.data()['timestamp'] as Timestamp?)?.toDate() ?? DateTime.fromMillisecondsSinceEpoch(0);
+                    final ta =
+                        (a.data()['timestamp'] as Timestamp?)?.toDate() ??
+                        DateTime.fromMillisecondsSinceEpoch(0);
+                    final tb =
+                        (b.data()['timestamp'] as Timestamp?)?.toDate() ??
+                        DateTime.fromMillisecondsSinceEpoch(0);
                     return tb.compareTo(ta);
                   });
                   if (docs.isEmpty) {
-                    return Center(child: Text('You have not voted yet', style: TextStyle(color: Colors.white70)));
+                    return Center(
+                      child: Text(
+                        'You have not voted yet',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    );
                   }
 
                   return ListView.separated(
@@ -76,33 +124,51 @@ class MyVotesPage extends StatelessWidget {
                       final candidateId = vote['candidateId'] as String?;
                       final ts = vote['timestamp'] as Timestamp?;
 
-                      return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                      return FutureBuilder<
+                        DocumentSnapshot<Map<String, dynamic>>
+                      >(
                         future: (electionId != null)
-                            ? FirebaseFirestore.instance.collection('elections').doc(electionId).get()
+                            ? FirebaseFirestore.instance
+                                  .collection('elections')
+                                  .doc(electionId)
+                                  .get()
                             : Future.value(null),
                         builder: (context, eSnap) {
-                          if (eSnap.connectionState == ConnectionState.waiting) {
+                          if (eSnap.connectionState ==
+                              ConnectionState.waiting) {
                             return _voteCardPlaceholder();
                           }
 
                           final eDoc = eSnap.data;
                           final eData = eDoc?.data();
-                          final title = (eData?['title'] ?? 'Unknown Election').toString();
+                          final title = (eData?['title'] ?? 'Unknown Election')
+                              .toString();
 
                           String candidateName = 'Unknown Candidate';
                           if (eData != null && eData['candidates'] is List) {
                             final List<dynamic> cands = eData['candidates'];
-                            final found = cands.cast<Map<String, dynamic>>().firstWhere(
-                              (c) => (c['candidateId'] ?? '') == (candidateId ?? ''),
-                              orElse: () => {},
-                            );
-                            if (found is Map && found.containsKey('name')) candidateName = (found['name'] ?? '').toString();
+                            final found = cands
+                                .cast<Map<String, dynamic>>()
+                                .firstWhere(
+                                  (c) =>
+                                      (c['candidateId'] ?? '') ==
+                                      (candidateId ?? ''),
+                                  orElse: () => {},
+                                );
+                            if (found is Map && found.containsKey('name'))
+                              candidateName = (found['name'] ?? '').toString();
                           }
 
                           final votedAt = ts?.toDate();
-                          final timeText = votedAt != null ? '${votedAt.day}/${votedAt.month}/${votedAt.year} ${votedAt.hour.toString().padLeft(2,'0')}:${votedAt.minute.toString().padLeft(2,'0')}' : 'Unknown time';
+                          final timeText = votedAt != null
+                              ? '${votedAt.day}/${votedAt.month}/${votedAt.year} ${votedAt.hour.toString().padLeft(2, '0')}:${votedAt.minute.toString().padLeft(2, '0')}'
+                              : 'Unknown time';
 
-                          return _voteCard(title: title, candidate: candidateName, time: timeText);
+                          return _voteCard(
+                            title: title,
+                            candidate: candidateName,
+                            time: timeText,
+                          );
                         },
                       );
                     },
@@ -116,7 +182,11 @@ class MyVotesPage extends StatelessWidget {
     );
   }
 
-  Widget _voteCard({required String title, required String candidate, required String time}) {
+  Widget _voteCard({
+    required String title,
+    required String candidate,
+    required String time,
+  }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
@@ -124,18 +194,30 @@ class MyVotesPage extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F7FB).withOpacity(0.94),
+            color: const Color(0xFFF5F7FB).withOpacity(0.10),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.white.withOpacity(0.22)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(color: Color(0xFF0B1020), fontWeight: FontWeight.w800)),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Color(0xFFF5F7FB),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               const SizedBox(height: 6),
-              Text('Voted for: $candidate', style: const TextStyle(color: Color(0xFF6B7A90))),
+              Text(
+                'Voted for: $candidate',
+                style: const TextStyle(color: Color(0xFFB9C6DD)),
+              ),
               const SizedBox(height: 8),
-              Text(time, style: const TextStyle(color: Color(0xFF6B7A90), fontSize: 12)),
+              Text(
+                time,
+                style: const TextStyle(color: Color(0xFFB9C6DD), fontSize: 12),
+              ),
             ],
           ),
         ),
@@ -151,7 +233,7 @@ class MyVotesPage extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F7FB).withOpacity(0.94),
+            color: const Color(0xFFF5F7FB).withOpacity(0.10),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.white.withOpacity(0.22)),
           ),

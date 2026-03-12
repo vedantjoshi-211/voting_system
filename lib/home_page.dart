@@ -17,9 +17,9 @@ class HomeScreen extends StatelessWidget {
   static const Color pageMid = Color(0xFF121A3A);
   static const Color pageBottom = Color(0xFF1B255A);
 
-  // Glass card styling - off-white colors
-  static const Color glassText = Color(0xFF0B1020);
-  static const Color glassSubtext = Color(0xFF6B7A90);
+  // Glass card styling aligned with login page
+  static const Color glassText = Color(0xFFF5F7FB);
+  static const Color glassSubtext = Color(0xFFB9C6DD);
   static const Color glassSurface = Color(0xFFF5F7FB);
 
   @override
@@ -40,11 +40,7 @@ class HomeScreen extends StatelessWidget {
           ),
 
           // Glow orbs (like login page)
-          Positioned(
-            top: -80,
-            left: -60,
-            child: _glowOrb(220, gradientStart),
-          ),
+          Positioned(top: -80, left: -60, child: _glowOrb(220, gradientStart)),
           Positioned(
             bottom: -100,
             right: -80,
@@ -101,11 +97,15 @@ class HomeScreen extends StatelessWidget {
                             if (snap.hasError) {
                               return _statusItem('-', 'Active Elections');
                             }
-                            if (snap.connectionState == ConnectionState.waiting) {
+                            if (snap.connectionState ==
+                                ConnectionState.waiting) {
                               return _statusItem('...', 'Active Elections');
                             }
                             final count = snap.data?.docs.length ?? 0;
-                            return _statusItem(count.toString(), 'Active Elections');
+                            return _statusItem(
+                              count.toString(),
+                              'Active Elections',
+                            );
                           },
                         ),
                         _statusItem('Today', 'Last Login'),
@@ -130,10 +130,12 @@ class HomeScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const ElectionsPage()),
+                            MaterialPageRoute(
+                              builder: (_) => const ElectionsPage(),
+                            ),
                           );
                         },
-                      ),                          
+                      ),
                       _featureCard(
                         icon: Icons.campaign,
                         title: 'Announcements',
@@ -141,7 +143,9 @@ class HomeScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const AnnouncementsPage()),
+                            MaterialPageRoute(
+                              builder: (_) => const AnnouncementsPage(),
+                            ),
                           );
                         },
                       ),
@@ -152,7 +156,9 @@ class HomeScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const PublicPollsPage()),
+                            MaterialPageRoute(
+                              builder: (_) => const PublicPollsPage(),
+                            ),
                           );
                         },
                       ),
@@ -163,7 +169,9 @@ class HomeScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const ResultsPage()),
+                            MaterialPageRoute(
+                              builder: (_) => const ResultsPage(),
+                            ),
                           );
                         },
                       ),
@@ -221,19 +229,26 @@ class HomeScreen extends StatelessWidget {
                           itemCount: docs.length,
                           itemBuilder: (context, index) {
                             final data = docs[index].data();
-                            final title = (data['title'] ?? 'Untitled').toString();
-                            final description =
-                                (data['description'] ?? '').toString();
+                            final title = (data['title'] ?? 'Untitled')
+                                .toString();
+                            final description = (data['description'] ?? '')
+                                .toString();
 
                             return _electionCard(
                               title: title,
-                              subtitle: description,
                               onVote: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => const ElectionsPage(),
                                   ),
+                                );
+                              },
+                              onMoreInfo: () {
+                                _showElectionInfoDialog(
+                                  context,
+                                  title: title,
+                                  description: description,
                                 );
                               },
                             );
@@ -263,9 +278,7 @@ class HomeScreen extends StatelessWidget {
                         .snapshots(),
                     builder: (context, snap) {
                       if (snap.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       }
 
                       if (snap.hasError) {
@@ -294,14 +307,19 @@ class HomeScreen extends StatelessWidget {
                             ...docs.asMap().entries.map((entry) {
                               int index = entry.key;
                               final data = entry.value.data();
-                              final title = (data['title'] ?? 'Untitled').toString();
-                              
+                              final title = (data['title'] ?? 'Untitled')
+                                  .toString();
+
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _AnnouncementRow(text: title),
                                   if (index < docs.length - 1)
-                                    const Divider(height: 18, color: Color(0xFFE8EEF5), thickness: 0.5),
+                                    const Divider(
+                                      height: 18,
+                                      color: Color(0x33F5F7FB),
+                                      thickness: 0.5,
+                                    ),
                                 ],
                               );
                             }).toList(),
@@ -339,7 +357,9 @@ class HomeScreen extends StatelessWidget {
               selectedItemColor: gradientEnd,
               unselectedItemColor: Colors.white70,
               selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
               onTap: (index) {
                 // index 1 -> Elections, index 2 -> Profile
                 if (index == 1) {
@@ -359,8 +379,14 @@ class HomeScreen extends StatelessWidget {
               },
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-                BottomNavigationBarItem(icon: Icon(Icons.how_to_vote), label: 'Vote'),
-                BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.how_to_vote),
+                  label: 'Vote',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline),
+                  label: 'Profile',
+                ),
               ],
             ),
           ),
@@ -379,15 +405,15 @@ class HomeScreen extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: glassSurface.withOpacity(0.92),
+            color: glassSurface.withOpacity(0.10),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withOpacity(0.4),
-              width: 1.5,
+              color: Colors.white.withOpacity(0.22),
+              width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withOpacity(0.20),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -411,10 +437,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(color: glassSubtext, fontSize: 12),
-        ),
+        Text(title, style: const TextStyle(color: glassSubtext, fontSize: 12)),
       ],
     );
   }
@@ -434,15 +457,15 @@ class HomeScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 14),
             decoration: BoxDecoration(
-              color: glassSurface.withOpacity(0.90),
+              color: glassSurface.withOpacity(0.10),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: Colors.white.withOpacity(0.35),
+                color: Colors.white.withOpacity(0.22),
                 width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
+                  color: Colors.black.withOpacity(0.20),
                   blurRadius: 16,
                   offset: const Offset(0, 8),
                 ),
@@ -486,12 +509,12 @@ class HomeScreen extends StatelessWidget {
 
   static Widget _electionCard({
     required String title,
-    required String subtitle,
     required VoidCallback onVote,
+    required VoidCallback onMoreInfo,
   }) {
     return Container(
       width: 280,
-      height: 220,
+      height: 200,
       margin: const EdgeInsets.only(right: 16),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -500,15 +523,15 @@ class HomeScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: glassSurface.withOpacity(0.92),
+              color: glassSurface.withOpacity(0.10),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: Colors.white.withOpacity(0.4),
-                width: 1.5,
+                color: Colors.white.withOpacity(0.22),
+                width: 1.2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withOpacity(0.20),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -527,41 +550,23 @@ class HomeScreen extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  style: const TextStyle(color: glassSubtext, fontSize: 13),
-                ),
                 const SizedBox(height: 12),
+                const SizedBox(height: 22),
                 // Vote Now Button
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
-                  child: _gradientButton(
-                    label: 'Vote Now',
-                    onPressed: onVote,
-                  ),
+                  height: 46,
+                  child: _gradientButton(label: 'Vote Now', onPressed: onVote),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 // Info Button
                 SizedBox(
                   width: double.infinity,
-                  height: 40,
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.info_outline, size: 18),
-                    label: const Text('More Info'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: glassSubtext,
-                      side: BorderSide(
-                        color: glassSubtext.withOpacity(0.3),
-                        width: 1.2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
+                  height: 46,
+                  child: _outlinedActionButton(
+                    label: 'More Info',
+                    icon: Icons.info_outline,
+                    onPressed: onMoreInfo,
                   ),
                 ),
               ],
@@ -580,16 +585,19 @@ class HomeScreen extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 0,
         backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
       ),
       child: Ink(
+        width: double.infinity,
+        height: double.infinity,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [gradientStart, gradientEnd],
-          ),
+          gradient: const LinearGradient(colors: [gradientStart, gradientEnd]),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Center(
@@ -597,7 +605,7 @@ class HomeScreen extends StatelessWidget {
             label,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -606,19 +614,91 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  static Widget _outlinedActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: glassText,
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        side: BorderSide(color: Colors.white.withOpacity(0.24), width: 1.2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: glassText,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Glow orb effect (like login page)
   static Widget _glowOrb(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withOpacity(0.25),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.4),
-            blurRadius: 120,
-            spreadRadius: 40,
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(0.12),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.14),
+              blurRadius: 52,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void _showElectionInfoDialog(
+    BuildContext context, {
+    required String title,
+    required String description,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: glassText,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Text(
+            description.isNotEmpty ? description : 'No description provided.',
+            style: const TextStyle(color: glassSubtext, fontSize: 14),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: glassSubtext)),
           ),
         ],
       ),

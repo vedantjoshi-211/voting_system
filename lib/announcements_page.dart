@@ -13,9 +13,9 @@ class AnnouncementsPage extends StatelessWidget {
   static const Color pageMid = Color(0xFF121A3A);
   static const Color pageBottom = Color(0xFF1B255A);
 
-  static const Color cardSurface = Color(0xFFF5F7FB);
-  static const Color cardText = Color(0xFF0B1020);
-  static const Color cardSub = Color(0xFF6B7A90);
+  static const Color glassText = Color(0xFFF5F7FB);
+  static const Color glassSubtext = Color(0xFFB9C6DD);
+  static const Color glassSurface = Color(0xFFF5F7FB);
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,11 @@ class AnnouncementsPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
       body: Stack(
@@ -44,11 +48,7 @@ class AnnouncementsPage extends StatelessWidget {
           ),
 
           // optional glow orbs for visual continuity
-          Positioned(
-            top: -60,
-            left: -40,
-            child: _glowOrb(180, gradientStart),
-          ),
+          Positioned(top: -60, left: -40, child: _glowOrb(180, gradientStart)),
           Positioned(
             bottom: -80,
             right: -60,
@@ -69,34 +69,52 @@ class AnnouncementsPage extends StatelessWidget {
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: cardSurface.withOpacity(0.94),
+                          color: glassSurface.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withOpacity(0.35)),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.22),
+                          ),
                         ),
                         child: Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(colors: [gradientStart, gradientEnd]),
+                                gradient: const LinearGradient(
+                                  colors: [gradientStart, gradientEnd],
+                                ),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.campaign, color: Colors.white, size: 22),
+                              child: const Icon(
+                                Icons.campaign,
+                                color: Colors.white,
+                                size: 22,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: const [
-                                  Text('Official Announcements',
-                                      style: TextStyle(
-                                          color: cardText, fontWeight: FontWeight.w800, fontSize: 16)),
+                                  Text(
+                                    'Official Announcements',
+                                    style: TextStyle(
+                                      color: glassText,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                   SizedBox(height: 4),
-                                  Text('Latest updates and notices from the college',
-                                      style: TextStyle(color: cardSub, fontSize: 13)),
+                                  Text(
+                                    'Latest updates and notices from the college',
+                                    style: TextStyle(
+                                      color: glassSubtext,
+                                      fontSize: 13,
+                                    ),
+                                  ),
                                 ],
                               ),
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -121,36 +139,55 @@ class AnnouncementsPage extends StatelessWidget {
                             builder: (context, snap) {
                               if (snap.hasError) {
                                 return Center(
-                                  child: Text('Error: ${snap.error}', style: const TextStyle(color: Colors.white70)),
+                                  child: Text(
+                                    'Error: ${snap.error}',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                    ),
+                                  ),
                                 );
                               }
-                              if (snap.connectionState == ConnectionState.waiting) {
-                                return const Center(child: CircularProgressIndicator());
+                              if (snap.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
                               }
 
                               final docs = snap.data?.docs ?? [];
                               if (docs.isEmpty) {
                                 return Center(
-                                  child: Text('No announcements yet', style: TextStyle(color: Colors.white70)),
+                                  child: Text(
+                                    'No announcements yet',
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
                                 );
                               }
 
                               return ListView.separated(
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: 10),
                                 itemCount: docs.length,
                                 itemBuilder: (context, index) {
                                   final data = docs[index].data();
-                                  final title = (data['title'] ?? 'Untitled').toString();
+                                  final title = (data['title'] ?? 'Untitled')
+                                      .toString();
                                   final body = (data['body'] ?? '').toString();
                                   final ts = data['createdAt'];
                                   final time = ts is Timestamp
                                       ? ts.toDate()
                                       : DateTime.now();
-                                  final subtitle = body.length > 120 ? '${body.substring(0, 120)}…' : body;
+                                  final subtitle = body.length > 120
+                                      ? '${body.substring(0, 120)}…'
+                                      : body;
 
                                   return Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
                                     child: _announcementCard(
                                       title: title,
                                       subtitle: subtitle,
@@ -159,29 +196,56 @@ class AnnouncementsPage extends StatelessWidget {
                                         showDialog(
                                           context: context,
                                           builder: (_) => AlertDialog(
-                                            backgroundColor: cardSurface.withOpacity(0.98),
-                                            title: Text(title, style: const TextStyle(color: cardText)),
+                                            backgroundColor: pageMid,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                              side: BorderSide(
+                                                color: Colors.white.withOpacity(
+                                                  0.22,
+                                                ),
+                                                width: 1,
+                                              ),
+                                            ),
+                                            title: Text(
+                                              title,
+                                              style: const TextStyle(
+                                                color: glassText,
+                                              ),
+                                            ),
                                             content: SingleChildScrollView(
                                               child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
                                                     body,
-                                                    style: const TextStyle(color: cardText),
+                                                    style: const TextStyle(
+                                                      color: glassSubtext,
+                                                    ),
                                                   ),
                                                   const SizedBox(height: 12),
                                                   Text(
                                                     'Posted: ${time.toLocal()}',
-                                                    style: const TextStyle(color: cardSub, fontSize: 12),
+                                                    style: const TextStyle(
+                                                      color: glassSubtext,
+                                                      fontSize: 12,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                             actions: [
                                               TextButton(
-                                                onPressed: () => Navigator.pop(context),
-                                                child: const Text('Close'),
-                                              )
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                child: const Text(
+                                                  'Close',
+                                                  style: TextStyle(
+                                                    color: glassSubtext,
+                                                  ),
+                                                ),
+                                              ),
                                             ],
                                           ),
                                         );
@@ -220,36 +284,61 @@ class AnnouncementsPage extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: cardSurface.withOpacity(0.94),
+              color: glassSurface.withOpacity(0.10),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withOpacity(0.28)),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 6))],
+              border: Border.all(color: Colors.white.withOpacity(0.22)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.20),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [gradientStart, gradientEnd]),
+                    gradient: const LinearGradient(
+                      colors: [gradientStart, gradientEnd],
+                    ),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.announcement, color: Colors.white, size: 20),
+                  child: const Icon(
+                    Icons.announcement,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(color: cardText, fontWeight: FontWeight.w800, fontSize: 15)),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: glassText,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
                       const SizedBox(height: 6),
-                      Text(subtitle, style: const TextStyle(color: cardSub, fontSize: 13)),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: glassSubtext,
+                          fontSize: 13,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '${time.day}/${time.month}/${time.year}',
-                  style: const TextStyle(color: cardSub, fontSize: 12),
+                  style: const TextStyle(color: glassSubtext, fontSize: 12),
                 ),
               ],
             ),
@@ -260,13 +349,21 @@ class AnnouncementsPage extends StatelessWidget {
   }
 
   Widget _glowOrb(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withOpacity(0.22),
-        boxShadow: [BoxShadow(color: color.withOpacity(0.36), blurRadius: 120, spreadRadius: 36)],
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(0.12),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.14),
+              blurRadius: 52,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -22,9 +22,9 @@ class EVotingApp extends StatelessWidget {
           // Show loading screen while Firebase initializes
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
-              backgroundColor: Color(0xFF170D3A),
+              backgroundColor: Color(0xFF0B1020),
               body: Center(
-                child: CircularProgressIndicator(color: Color(0xFF58B9FF)),
+                child: CircularProgressIndicator(color: Color(0xFF4DD0E1)),
               ),
             );
           }
@@ -32,7 +32,7 @@ class EVotingApp extends StatelessWidget {
           // Show error if Firebase fails to initialize
           if (snapshot.hasError) {
             return Scaffold(
-              backgroundColor: Color(0xFF170D3A),
+              backgroundColor: Color(0xFF0B1020),
               body: Center(
                 child: Padding(
                   padding: EdgeInsets.all(24),

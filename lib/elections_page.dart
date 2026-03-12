@@ -15,11 +15,19 @@ class ElectionsPage extends StatefulWidget {
 class _ElectionsPageState extends State<ElectionsPage> {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
+  static const Color gradientStart = Color(0xFF6C7CFF);
+  static const Color gradientEnd = Color(0xFF4DD0E1);
+  static const Color pageTop = Color(0xFF0B1020);
+  static const Color pageMid = Color(0xFF121A3A);
+  static const Color pageBottom = Color(0xFF1B255A);
+  static const Color glassText = Color(0xFFF5F7FB);
+  static const Color glassSubtext = Color(0xFFB9C6DD);
+  static const Color glassSurface = Color(0xFFF5F7FB);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1020),
+      backgroundColor: pageTop,
       appBar: AppBar(
         title: const Text('Elections'),
         centerTitle: true,
@@ -27,9 +35,10 @@ class _ElectionsPageState extends State<ElectionsPage> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         titleTextStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w700),
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
       body: Stack(
@@ -40,31 +49,22 @@ class _ElectionsPageState extends State<ElectionsPage> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF0B1020),
-                  Color(0xFF121A3A),
-                  Color(0xFF1B255A),
-                ],
+                colors: [pageTop, pageMid, pageBottom],
               ),
             ),
           ),
 
           /// Glow Orbs
-          Positioned(
-            top: -60,
-            left: -40,
-            child: _glowOrb(180, const Color(0xFF6C7CFF)),
-          ),
+          Positioned(top: -60, left: -40, child: _glowOrb(180, gradientStart)),
           Positioned(
             bottom: -80,
             right: -60,
-            child: _glowOrb(220, const Color(0xFF4DD0E1)),
+            child: _glowOrb(220, gradientEnd),
           ),
 
           SafeArea(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               child: widget.electionId != null
                   ? _singleElectionView()
                   : _activeElectionsView(),
@@ -78,13 +78,15 @@ class _ElectionsPageState extends State<ElectionsPage> {
   /// ================= SINGLE ELECTION VIEW =================
   Widget _singleElectionView() {
     return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      future:
-          _firestore.collection('elections').doc(widget.electionId).get(),
+      future: _firestore.collection('elections').doc(widget.electionId).get(),
       builder: (context, docSnap) {
         if (docSnap.hasError) {
           return Center(
-              child: Text('Error: ${docSnap.error}',
-                  style: const TextStyle(color: Colors.white70)));
+            child: Text(
+              'Error: ${docSnap.error}',
+              style: const TextStyle(color: Colors.white70),
+            ),
+          );
         }
 
         if (docSnap.connectionState == ConnectionState.waiting) {
@@ -94,8 +96,11 @@ class _ElectionsPageState extends State<ElectionsPage> {
         final doc = docSnap.data;
         if (doc == null || !doc.exists) {
           return const Center(
-              child: Text('Election not found',
-                  style: TextStyle(color: Colors.white70)));
+            child: Text(
+              'Election not found',
+              style: TextStyle(color: Colors.white70),
+            ),
+          );
         }
 
         final data = doc.data() ?? {};
@@ -128,8 +133,11 @@ class _ElectionsPageState extends State<ElectionsPage> {
       builder: (context, snap) {
         if (snap.hasError) {
           return Center(
-              child: Text('Error: ${snap.error}',
-                  style: const TextStyle(color: Colors.white70)));
+            child: Text(
+              'Error: ${snap.error}',
+              style: const TextStyle(color: Colors.white70),
+            ),
+          );
         }
 
         if (snap.connectionState == ConnectionState.waiting) {
@@ -140,8 +148,11 @@ class _ElectionsPageState extends State<ElectionsPage> {
 
         if (docs.isEmpty) {
           return const Center(
-              child: Text('No active elections',
-                  style: TextStyle(color: Colors.white70)));
+            child: Text(
+              'No active elections',
+              style: TextStyle(color: Colors.white70),
+            ),
+          );
         }
 
         return ListView.separated(
@@ -154,7 +165,7 @@ class _ElectionsPageState extends State<ElectionsPage> {
             final description = (data['description'] ?? '').toString();
             final candidates =
                 (data['candidates'] as List?)?.cast<Map<String, dynamic>>() ??
-                    [];
+                [];
 
             return _electionCard(
               electionId: electionId,
@@ -182,64 +193,82 @@ class _ElectionsPageState extends State<ElectionsPage> {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F7FB).withOpacity(0.92),
+            color: glassSurface.withOpacity(0.10),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withOpacity(0.4),
-              width: 1.5,
+              color: Colors.white.withOpacity(0.22),
+              width: 1.2,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.20),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: const TextStyle(
-                      color: Color(0xFF0B1020),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800)),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: glassText,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text(description,
-                  style: const TextStyle(
-                      color: Color(0xFF6B7A90), fontSize: 13)),
+              Text(
+                description,
+                style: const TextStyle(color: glassSubtext, fontSize: 13),
+              ),
               const SizedBox(height: 16),
-              const Text('Select Candidate:',
-                  style: TextStyle(
-                      color: Color(0xFF0B1020),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600)),
+              const Text(
+                'Select Candidate:',
+                style: TextStyle(
+                  color: glassText,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 12),
 
               ...candidates.map((candidate) {
                 return GestureDetector(
                   onTap: () {
                     _handleVote(
-                        electionId,
-                        candidate['candidateId'].toString(),
-                        candidate['name'].toString());
+                      electionId,
+                      candidate['candidateId'].toString(),
+                      candidate['name'].toString(),
+                    );
                   },
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withOpacity(0.06),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFF6C7CFF).withOpacity(0.3),
-                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.16)),
                     ),
                     child: Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: Text(candidate['name'] ?? 'Unknown',
-                              style: const TextStyle(
-                                  color: Color(0xFF0B1020),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600)),
+                          child: Text(
+                            candidate['name'] ?? 'Unknown',
+                            style: const TextStyle(
+                              color: glassText,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                        const Icon(Icons.arrow_forward_ios,
-                            size: 14, color: Color(0xFF6B7A90)),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: glassSubtext,
+                        ),
                       ],
                     ),
                   ),
@@ -254,7 +283,10 @@ class _ElectionsPageState extends State<ElectionsPage> {
 
   /// ================= VOTING LOGIC =================
   Future<void> _handleVote(
-      String electionId, String candidateId, String candidateName) async {
+    String electionId,
+    String candidateId,
+    String candidateName,
+  ) async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return;
 
@@ -264,14 +296,15 @@ class _ElectionsPageState extends State<ElectionsPage> {
           .where('userId', isEqualTo: userId)
           .get();
 
-      final existingVoteDocs = userVotesSnapshot.docs
-          .where((d) => (d.data()['electionId'] ?? '') == electionId);
+      final existingVoteDocs = userVotesSnapshot.docs.where(
+        (d) => (d.data()['electionId'] ?? '') == electionId,
+      );
 
       if (existingVoteDocs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content:
-                  Text('You have already voted in this election')),
+            content: Text('You have already voted in this election'),
+          ),
         );
         return;
       }
@@ -283,8 +316,10 @@ class _ElectionsPageState extends State<ElectionsPage> {
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      final electionDoc =
-          await _firestore.collection('elections').doc(electionId).get();
+      final electionDoc = await _firestore
+          .collection('elections')
+          .doc(electionId)
+          .get();
 
       final List candidates =
           (electionDoc.data()?['candidates'] as List?) ?? [];
@@ -295,37 +330,37 @@ class _ElectionsPageState extends State<ElectionsPage> {
         }
       }
 
-      await _firestore
-          .collection('elections')
-          .doc(electionId)
-          .update({'candidates': candidates});
+      await _firestore.collection('elections').doc(electionId).update({
+        'candidates': candidates,
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text('Vote cast for $candidateName successfully!')),
+        SnackBar(content: Text('Vote cast for $candidateName successfully!')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
   /// ================= GLOW ORB =================
   Widget _glowOrb(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withOpacity(0.25),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.4),
-            blurRadius: 120,
-            spreadRadius: 40,
-          ),
-        ],
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(0.12),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.14),
+              blurRadius: 52,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
       ),
     );
   }

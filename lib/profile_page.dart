@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'login_page.dart';
 import 'my_votes_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -55,6 +56,9 @@ class _ProfilePageState extends State<ProfilePage> {
     const pageBottom = Color(0xFF1B255A);
     const gradientStart = Color(0xFF6C7CFF);
     const gradientEnd = Color(0xFF4DD0E1);
+    const glassText = Color(0xFFF5F7FB);
+    const glassSubtext = Color(0xFFB9C6DD);
+    const glassSurface = Color(0xFFF5F7FB);
 
     return Scaffold(
       backgroundColor: pageTop,
@@ -64,7 +68,11 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text('My Profile'),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
       body: Stack(
@@ -83,7 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // Profile card (off-white, matching home style)
+                  // Profile card (dark glass, matching home style)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: BackdropFilter(
@@ -91,12 +99,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F7FB).withOpacity(0.92),
+                          color: glassSurface.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.2),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.22),
+                            width: 1.2,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.12),
+                              color: Colors.black.withOpacity(0.20),
                               blurRadius: 16,
                               offset: const Offset(0, 8),
                             ),
@@ -107,7 +118,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(colors: [gradientStart, gradientEnd]),
+                                gradient: const LinearGradient(
+                                  colors: [gradientStart, gradientEnd],
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: CircleAvatar(
@@ -115,19 +128,30 @@ class _ProfilePageState extends State<ProfilePage> {
                                 backgroundColor: Colors.white,
                                 child: Text(
                                   _initialsFromEmail(user?.email),
-                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black87),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87,
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 14),
                             Text(
                               user?.displayName ?? 'Voter',
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF0B1020)),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: glassText,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Text(
                               user?.email ?? 'No email',
-                              style: const TextStyle(fontSize: 14, color: Color(0xFF6B7A90)),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: glassSubtext,
+                              ),
                             ),
                             const SizedBox(height: 18),
 
@@ -136,28 +160,43 @@ class _ProfilePageState extends State<ProfilePage> {
                               future: _enrollmentFuture,
                               builder: (context, snap) {
                                 Widget valueWidget;
-                                if (snap.connectionState == ConnectionState.waiting) {
+                                if (snap.connectionState ==
+                                    ConnectionState.waiting) {
                                   valueWidget = const SizedBox(
                                     height: 18,
                                     width: 18,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
                                   );
                                 } else {
                                   final val = snap.data;
                                   valueWidget = Text(
-                                    (val != null && val.isNotEmpty) ? val : 'Not set',
-                                    style: const TextStyle(color: Color(0xFF0B1020), fontWeight: FontWeight.w700),
+                                    (val != null && val.isNotEmpty)
+                                        ? val
+                                        : 'Not set',
+                                    style: const TextStyle(
+                                      color: glassText,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   );
                                 }
 
                                 return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     Row(
                                       children: [
-                                        const Icon(Icons.badge, color: Color(0xFF6B7A90)),
+                                        const Icon(
+                                          Icons.badge,
+                                          color: glassSubtext,
+                                        ),
                                         const SizedBox(width: 10),
-                                        const Text('Enrollment', style: TextStyle(color: Color(0xFF6B7A90))),
+                                        const Text(
+                                          'Enrollment',
+                                          style: TextStyle(color: glassSubtext),
+                                        ),
                                         const Spacer(),
                                         valueWidget,
                                       ],
@@ -169,14 +208,31 @@ class _ProfilePageState extends State<ProfilePage> {
                                       child: ElevatedButton(
                                         onPressed: () async {
                                           await _auth.signOut();
-                                          if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+                                          if (!mounted) return;
+                                          Navigator.of(
+                                            context,
+                                          ).pushAndRemoveUntil(
+                                            MaterialPageRoute(
+                                              builder: (_) => const LoginPage(),
+                                            ),
+                                            (route) => false,
+                                          );
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: gradientEnd,
-                                          padding: const EdgeInsets.symmetric(vertical: 14),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 14,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
                                         ),
-                                        child: const Text('Sign out', style: TextStyle(color: Colors.white)),
+                                        child: const Text(
+                                          'Sign out',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -197,21 +253,39 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.06),
                           borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.16),
+                            width: 1,
+                          ),
                         ),
                         child: Column(
                           children: [
                             ListTile(
-                              leading: const Icon(Icons.history, color: Colors.white70),
-                              title: const Text('My Votes', style: TextStyle(color: Colors.white)),
-                              trailing: const Icon(Icons.chevron_right, color: Colors.white70),
+                              leading: const Icon(
+                                Icons.history,
+                                color: Colors.white70,
+                              ),
+                              title: const Text(
+                                'My Votes',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              trailing: const Icon(
+                                Icons.chevron_right,
+                                color: Colors.white70,
+                              ),
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (_) => const MyVotesPage()),
+                                  MaterialPageRoute(
+                                    builder: (_) => const MyVotesPage(),
+                                  ),
                                 );
                               },
                             ),
@@ -233,6 +307,8 @@ class _ProfilePageState extends State<ProfilePage> {
     if (email == null || email.isEmpty) return 'V';
     final part = email.split('@').first;
     if (part.isEmpty) return 'V';
-    return part.length >= 2 ? part.substring(0, 2).toUpperCase() : part.substring(0, 1).toUpperCase();
+    return part.length >= 2
+        ? part.substring(0, 2).toUpperCase()
+        : part.substring(0, 1).toUpperCase();
   }
 }

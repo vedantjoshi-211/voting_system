@@ -14,6 +14,10 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   final _firestore = FirebaseFirestore.instance;
 
+  static const Color _panelText = Color(0xFFF5F7FB);
+  static const Color _mutedText = Color(0xFFB9C6DD);
+  static const Color _glassSurface = Color(0xFFF5F7FB);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,8 +28,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle:
-            const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
         systemOverlayStyle: SystemUiOverlayStyle.light,
         actions: [
           IconButton(
@@ -75,66 +82,111 @@ class _AdminDashboardState extends State<AdminDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top actions: Create Election + Add Announcement + Manage Polls
+                  // Top actions arranged in two rows to keep labels fully visible.
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton.icon(
+                      onPressed: _showCreateElectionDialog,
+                      icon: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      label: const Text(
+                        'Create Election',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _glassSurface.withOpacity(0.14),
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        side: BorderSide(
+                          color: Colors.white.withOpacity(0.22),
+                          width: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: SizedBox(
                           height: 54,
-                          child: ElevatedButton(
-                            onPressed: _showCreateElectionDialog,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF6C7CFF),
-                              elevation: 6,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
+                          child: ElevatedButton.icon(
+                            onPressed: _showAddAnnouncementDialog,
+                            icon: const Icon(
+                              Icons.announcement,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            label: const Text(
+                              'Announcement',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
-                              shadowColor: const Color(0xFF4DD0E1).withOpacity(0.25),
-                              textStyle: const TextStyle(fontWeight: FontWeight.w600),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.add, color: Colors.white),
-                                SizedBox(width: 8),
-                                Text('Create Election', style: TextStyle(color: Colors.white, fontSize: 13)),
-                              ],
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _glassSurface.withOpacity(0.14),
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              side: BorderSide(
+                                color: Colors.white.withOpacity(0.22),
+                                width: 1.2,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      SizedBox(
-                        width: 54,
-                        height: 54,
-                        child: ElevatedButton(
-                          onPressed: _showAddAnnouncementDialog,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4DD0E1),
-                            elevation: 6,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                      Expanded(
+                        child: SizedBox(
+                          height: 54,
+                          child: ElevatedButton.icon(
+                            onPressed: _showCreatePollDialog,
+                            icon: const Icon(
+                              Icons.poll,
+                              color: Colors.white,
+                              size: 18,
                             ),
-                            shadowColor: const Color(0xFF4DD0E1).withOpacity(0.25),
-                          ),
-                          child: const Icon(Icons.announcement, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 54,
-                        height: 54,
-                        child: ElevatedButton(
-                          onPressed: _showCreatePollDialog,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            elevation: 6,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                            label: const Text(
+                              'Create Poll',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                            shadowColor: Colors.orange.withOpacity(0.25),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _glassSurface.withOpacity(0.14),
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              side: BorderSide(
+                                color: Colors.white.withOpacity(0.22),
+                                width: 1.2,
+                              ),
+                            ),
                           ),
-                          child: const Icon(Icons.poll, color: Colors.white),
                         ),
                       ),
                     ],
@@ -163,7 +215,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     builder: (context, snap) {
                       if (snap.hasError) {
                         return Center(
-                          child: Text('Error: ${snap.error}', style: const TextStyle(color: Colors.white70)),
+                          child: Text(
+                            'Error: ${snap.error}',
+                            style: const TextStyle(color: Colors.white70),
+                          ),
                         );
                       }
                       if (snap.connectionState == ConnectionState.waiting) {
@@ -172,7 +227,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
                       final docs = snap.data?.docs ?? [];
                       if (docs.isEmpty) {
-                        return Center(child: Text('No elections yet', style: TextStyle(color: Colors.white70)));
+                        return Center(
+                          child: Text(
+                            'No elections yet',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        );
                       }
 
                       return ListView.separated(
@@ -183,10 +243,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         itemBuilder: (context, index) {
                           final data = docs[index].data();
                           final electionId = docs[index].id;
-                          final title = (data['title'] ?? 'Untitled').toString();
-                          final status = (data['status'] ?? 'upcoming').toString();
-                          final candidates = (data['candidates'] as List?)?.length ?? 0;
-                          final resultsVisible = data['resultsVisible'] ?? false;
+                          final title = (data['title'] ?? 'Untitled')
+                              .toString();
+                          final status = (data['status'] ?? 'upcoming')
+                              .toString();
+                          final candidates =
+                              (data['candidates'] as List?)?.length ?? 0;
+                          final resultsVisible =
+                              data['resultsVisible'] ?? false;
 
                           return _electionCard(
                             electionId: electionId,
@@ -201,7 +265,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               _showDeleteConfirmation(electionId);
                             },
                             onToggleResults: () {
-                              _toggleResultsVisibility(electionId, resultsVisible);
+                              _toggleResultsVisibility(
+                                electionId,
+                                resultsVisible,
+                              );
                             },
                           );
                         },
@@ -232,7 +299,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     builder: (context, snap) {
                       if (snap.hasError) {
                         return Center(
-                          child: Text('Error: ${snap.error}', style: const TextStyle(color: Colors.white70)),
+                          child: Text(
+                            'Error: ${snap.error}',
+                            style: const TextStyle(color: Colors.white70),
+                          ),
                         );
                       }
                       if (snap.connectionState == ConnectionState.waiting) {
@@ -241,7 +311,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
                       final docs = snap.data?.docs ?? [];
                       if (docs.isEmpty) {
-                        return Center(child: Text('No polls yet', style: TextStyle(color: Colors.white70)));
+                        return Center(
+                          child: Text(
+                            'No polls yet',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        );
                       }
 
                       return ListView.separated(
@@ -252,12 +327,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         itemBuilder: (context, index) {
                           final data = docs[index].data();
                           final pollId = docs[index].id;
-                          final title = (data['title'] ?? 'Untitled').toString();
-                          final description = (data['description'] ?? '').toString();
-                          final options = List<String>.from(data['options'] ?? []);
+                          final title = (data['title'] ?? 'Untitled')
+                              .toString();
+                          final description = (data['description'] ?? '')
+                              .toString();
+                          final options = List<String>.from(
+                            data['options'] ?? [],
+                          );
                           final isOpen = data['isOpen'] ?? true;
-                          final votes = Map<String, int>.from(data['votes'] ?? {});
-                          final totalVotes = votes.values.fold(0, (sum, val) => sum + val);
+                          final votes = Map<String, int>.from(
+                            data['votes'] ?? {},
+                          );
+                          final totalVotes = votes.values.fold(
+                            0,
+                            (sum, val) => sum + val,
+                          );
 
                           return _pollManagementCard(
                             pollId: pollId,
@@ -295,10 +379,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(!current ? 'Results published to voters' : 'Results hidden from voters')),
+        SnackBar(
+          content: Text(
+            !current
+                ? 'Results published to voters'
+                : 'Results hidden from voters',
+          ),
+        ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -312,7 +404,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
         SnackBar(content: Text(!current ? 'Poll opened' : 'Poll closed')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -333,11 +427,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F7FB).withOpacity(0.98),
+            color: _glassSurface.withOpacity(0.10),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.2),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.22),
+              width: 1.2,
+            ),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 16, offset: const Offset(0, 8)),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.20),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
             ],
           ),
           child: Column(
@@ -351,7 +452,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: Text(
                       title,
                       style: const TextStyle(
-                        color: Color(0xFF0B1020),
+                        color: _panelText,
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
@@ -361,15 +462,22 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: status == 'active' ? Colors.green.withOpacity(0.12) : Colors.orange.withOpacity(0.12),
+                      color: status == 'active'
+                          ? Colors.green.withOpacity(0.12)
+                          : Colors.orange.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       status.toUpperCase(),
                       style: TextStyle(
-                        color: status == 'active' ? Colors.green : Colors.orange,
+                        color: status == 'active'
+                            ? Colors.green
+                            : Colors.orange,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
@@ -379,54 +487,115 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
 
               const SizedBox(height: 8),
-              Text('Candidates: $candidateCount', style: const TextStyle(color: Color(0xFF6B7A90), fontSize: 13)),
+              Text(
+                'Candidates: $candidateCount',
+                style: const TextStyle(color: _mutedText, fontSize: 13),
+              ),
               const SizedBox(height: 12),
 
-              // Action buttons row — use filled buttons so text is always readable
+              // Primary actions row
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: onEdit,
-                      icon: const Icon(Icons.edit, size: 18, color: Colors.white),
-                      label: const Text('Edit', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6C7CFF),
-                        elevation: 4,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: onEdit,
+                        icon: const Icon(
+                          Icons.edit,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Edit',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6C7CFF),
+                          elevation: 0,
+                          side: BorderSide(
+                            color: Colors.white.withOpacity(0.22),
+                            width: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: onDelete,
-                      icon: const Icon(Icons.delete, size: 18, color: Colors.white),
-                      label: const Text('Delete', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        elevation: 4,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: onToggleResults,
-                      icon: Icon(resultsVisible ? Icons.visibility_off : Icons.visibility, size: 18, color: Colors.white),
-                      label: Text(resultsVisible ? 'Hide Results' : 'Show Results', style: const TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: resultsVisible ? Colors.orange : const Color(0xFF6C7CFF),
-                        elevation: 4,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: onDelete,
+                        icon: const Icon(
+                          Icons.delete,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Delete',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          elevation: 0,
+                          side: BorderSide(
+                            color: Colors.white.withOpacity(0.22),
+                            width: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              // Result visibility gets a full-width row so text is never clipped.
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: onToggleResults,
+                  icon: Icon(
+                    resultsVisible ? Icons.visibility_off : Icons.visibility,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    resultsVisible ? 'Hide Results' : 'Show Results',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: resultsVisible
+                        ? Colors.orange
+                        : const Color(0xFF6C7CFF),
+                    elevation: 0,
+                    side: BorderSide(
+                      color: Colors.white.withOpacity(0.22),
+                      width: 1,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -452,11 +621,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F7FB).withOpacity(0.98),
+            color: _glassSurface.withOpacity(0.10),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.35), width: 1.2),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.22),
+              width: 1.2,
+            ),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 16, offset: const Offset(0, 8)),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.20),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
             ],
           ),
           child: Column(
@@ -470,7 +646,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: Text(
                       title,
                       style: const TextStyle(
-                        color: Color(0xFF0B1020),
+                        color: _panelText,
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
@@ -480,9 +656,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: isOpen ? Colors.green.withOpacity(0.12) : Colors.red.withOpacity(0.12),
+                      color: isOpen
+                          ? Colors.green.withOpacity(0.12)
+                          : Colors.red.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -498,14 +679,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
 
               const SizedBox(height: 8),
-              Text('Options: $optionCount | Votes: $totalVotes', 
-                style: const TextStyle(color: Color(0xFF6B7A90), fontSize: 13)),
+              Text(
+                'Options: $optionCount | Votes: $totalVotes',
+                style: const TextStyle(color: _mutedText, fontSize: 13),
+              ),
               const SizedBox(height: 12),
 
               if (description.isNotEmpty)
                 Text(
                   description,
-                  style: const TextStyle(color: Color(0xFF6B7A90), fontSize: 12),
+                  style: const TextStyle(color: _mutedText, fontSize: 12),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -515,29 +698,67 @@ class _AdminDashboardState extends State<AdminDashboard> {
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: onToggleStatus,
-                      icon: Icon(isOpen ? Icons.lock : Icons.lock_open, size: 18, color: Colors.white),
-                      label: Text(isOpen ? 'Close Poll' : 'Open Poll', style: const TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isOpen ? Colors.orange : Colors.green,
-                        elevation: 4,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: onToggleStatus,
+                        icon: Icon(
+                          isOpen ? Icons.lock : Icons.lock_open,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          isOpen ? 'Close Poll' : 'Open Poll',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isOpen
+                              ? Colors.orange
+                              : Colors.green,
+                          elevation: 0,
+                          side: BorderSide(
+                            color: Colors.white.withOpacity(0.22),
+                            width: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: onDelete,
-                      icon: const Icon(Icons.delete, size: 18, color: Colors.white),
-                      label: const Text('Delete', style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        elevation: 4,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: onDelete,
+                        icon: const Icon(
+                          Icons.delete,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Delete',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          elevation: 0,
+                          side: BorderSide(
+                            color: Colors.white.withOpacity(0.22),
+                            width: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -559,48 +780,89 @@ class _AdminDashboardState extends State<AdminDashboard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFF5F7FB),
-        title: const Text('Create Election'),
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: const Text(
+          'Create Election',
+          style: TextStyle(color: _panelText),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleController, decoration: _inputDecoration('Election Title')),
+              TextField(
+                controller: titleController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Election Title'),
+              ),
               const SizedBox(height: 12),
-              TextField(controller: descController, decoration: _inputDecoration('Description'), maxLines: 3),
+              TextField(
+                controller: descController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Description'),
+                maxLines: 3,
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: candidatesController,
-                decoration: _inputDecoration('Candidates (comma-separated, e.g. John, Jane, Mike)'),
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration(
+                  'Candidates (comma-separated, e.g. John, Jane, Mike)',
+                ),
                 maxLines: 3,
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value: selectedStatus,
                 items: ['upcoming', 'active', 'completed']
-                    .map((status) => DropdownMenuItem(value: status, child: Text(status)))
+                    .map(
+                      (status) => DropdownMenuItem(
+                        value: status,
+                        child: Text(
+                          status,
+                          style: const TextStyle(color: _panelText),
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: (value) {
                   selectedStatus = value ?? 'upcoming';
                 },
+                style: const TextStyle(color: _panelText),
+                dropdownColor: const Color(0xFF1B255A),
+                iconEnabledColor: _mutedText,
                 decoration: _inputDecoration('Status'),
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: _mutedText)),
+          ),
           TextButton(
             onPressed: () async {
-              if (titleController.text.isEmpty || candidatesController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fill all required fields')));
+              if (titleController.text.isEmpty ||
+                  candidatesController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Fill all required fields')),
+                );
                 return;
               }
 
-              List<String> candidateNames = candidatesController.text.split(',').map((name) => name.trim()).toList();
-              List<Map<String, dynamic>> candidates = candidateNames.asMap().entries.map((entry) {
+              List<String> candidateNames = candidatesController.text
+                  .split(',')
+                  .map((name) => name.trim())
+                  .toList();
+              List<Map<String, dynamic>>
+              candidates = candidateNames.asMap().entries.map((entry) {
                 return {
-                  'candidateId': '${DateTime.now().millisecondsSinceEpoch}_${entry.key}',
+                  'candidateId':
+                      '${DateTime.now().millisecondsSinceEpoch}_${entry.key}',
                   'name': entry.value,
                   'votes': 0,
                 };
@@ -617,12 +879,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 });
 
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Election created successfully')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Election created successfully'),
+                  ),
+                );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: $e')));
               }
             },
-            child: const Text('Create'),
+            child: const Text('Create', style: TextStyle(color: _panelText)),
           ),
         ],
       ),
@@ -637,47 +905,83 @@ class _AdminDashboardState extends State<AdminDashboard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFF5F7FB),
-        title: const Text('Edit Election'),
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: const Text('Edit Election', style: TextStyle(color: _panelText)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleController, decoration: _inputDecoration('Election Title')),
+              TextField(
+                controller: titleController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Election Title'),
+              ),
               const SizedBox(height: 12),
-              TextField(controller: descController, decoration: _inputDecoration('Description'), maxLines: 3),
+              TextField(
+                controller: descController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Description'),
+                maxLines: 3,
+              ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 value: selectedStatus,
                 items: ['upcoming', 'active', 'completed']
-                    .map((status) => DropdownMenuItem(value: status, child: Text(status)))
+                    .map(
+                      (status) => DropdownMenuItem(
+                        value: status,
+                        child: Text(
+                          status,
+                          style: const TextStyle(color: _panelText),
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: (value) {
                   selectedStatus = value ?? 'upcoming';
                 },
+                style: const TextStyle(color: _panelText),
+                dropdownColor: const Color(0xFF1B255A),
+                iconEnabledColor: _mutedText,
                 decoration: _inputDecoration('Status'),
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: _mutedText)),
+          ),
           TextButton(
             onPressed: () async {
               try {
-                await _firestore.collection('elections').doc(electionId).update({
-                  'title': titleController.text,
-                  'description': descController.text,
-                  'status': selectedStatus,
-                });
+                await _firestore
+                    .collection('elections')
+                    .doc(electionId)
+                    .update({
+                      'title': titleController.text,
+                      'description': descController.text,
+                      'status': selectedStatus,
+                    });
 
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Election updated successfully')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Election updated successfully'),
+                  ),
+                );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: $e')));
               }
             },
-            child: const Text('Update'),
+            child: const Text('Update', style: TextStyle(color: _panelText)),
           ),
         ],
       ),
@@ -688,22 +992,45 @@ class _AdminDashboardState extends State<AdminDashboard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFF5F7FB),
-        title: const Text('Delete Election'),
-        content: const Text('Are you sure you want to delete this election?'),
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: const Text(
+          'Delete Election',
+          style: TextStyle(color: _panelText),
+        ),
+        content: const Text(
+          'Are you sure you want to delete this election?',
+          style: TextStyle(color: _mutedText),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: _mutedText)),
+          ),
           TextButton(
             onPressed: () async {
               try {
-                await _firestore.collection('elections').doc(electionId).delete();
+                await _firestore
+                    .collection('elections')
+                    .doc(electionId)
+                    .delete();
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Election deleted')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Election deleted')),
+                );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: $e')));
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.redAccent),
+            ),
           ),
         ],
       ),
@@ -717,24 +1044,45 @@ class _AdminDashboardState extends State<AdminDashboard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFF5F7FB),
-        title: const Text('Add Announcement'),
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: const Text(
+          'Add Announcement',
+          style: TextStyle(color: _panelText),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleController, decoration: _inputDecoration('Title')),
+              TextField(
+                controller: titleController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Title'),
+              ),
               const SizedBox(height: 12),
-              TextField(controller: bodyController, decoration: _inputDecoration('Message'), maxLines: 4),
+              TextField(
+                controller: bodyController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Message'),
+                maxLines: 4,
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: _mutedText)),
+          ),
           TextButton(
             onPressed: () async {
               if (titleController.text.isEmpty || bodyController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fill all fields')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Fill all fields')),
+                );
                 return;
               }
               try {
@@ -744,12 +1092,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   'createdAt': FieldValue.serverTimestamp(),
                 });
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Announcement added')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Announcement added')),
+                );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: $e')));
               }
             },
-            child: const Text('Add'),
+            child: const Text('Add', style: TextStyle(color: _panelText)),
           ),
         ],
       ),
@@ -759,9 +1111,22 @@ class _AdminDashboardState extends State<AdminDashboard> {
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
+      labelStyle: const TextStyle(color: _mutedText),
+      hintStyle: const TextStyle(color: _mutedText),
       filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      fillColor: _glassSurface.withOpacity(0.08),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.18)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withOpacity(0.18)),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderSide: BorderSide(color: Color(0xFF4DD0E1), width: 1.3),
+      ),
     );
   }
 
@@ -773,38 +1138,62 @@ class _AdminDashboardState extends State<AdminDashboard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFF5F7FB),
-        title: const Text('Create Public Poll'),
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: const Text(
+          'Create Public Poll',
+          style: TextStyle(color: _panelText),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleController, decoration: _inputDecoration('Poll Title')),
+              TextField(
+                controller: titleController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Poll Title'),
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: descController,
+                style: const TextStyle(color: _panelText),
                 decoration: _inputDecoration('Description (optional)'),
                 maxLines: 2,
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: optionsController,
-                decoration: _inputDecoration('Poll Options (comma-separated, e.g. Option A, Option B, Option C)'),
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration(
+                  'Poll Options (comma-separated, e.g. Option A, Option B, Option C)',
+                ),
                 maxLines: 3,
               ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: _mutedText)),
+          ),
           TextButton(
             onPressed: () async {
-              if (titleController.text.isEmpty || optionsController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fill all required fields')));
+              if (titleController.text.isEmpty ||
+                  optionsController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Fill all required fields')),
+                );
                 return;
               }
 
-              List<String> options = optionsController.text.split(',').map((opt) => opt.trim()).toList();
+              List<String> options = optionsController.text
+                  .split(',')
+                  .map((opt) => opt.trim())
+                  .toList();
               Map<String, int> votes = {};
               for (var option in options) {
                 votes[option] = 0;
@@ -821,12 +1210,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 });
 
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Poll created successfully')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Poll created successfully')),
+                );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: $e')));
               }
             },
-            child: const Text('Create'),
+            child: const Text('Create', style: TextStyle(color: _panelText)),
           ),
         ],
       ),
@@ -837,22 +1230,42 @@ class _AdminDashboardState extends State<AdminDashboard> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFF5F7FB),
-        title: const Text('Delete Poll'),
-        content: const Text('Are you sure you want to delete this poll?'),
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: const Text('Delete Poll', style: TextStyle(color: _panelText)),
+        content: const Text(
+          'Are you sure you want to delete this poll?',
+          style: TextStyle(color: _mutedText),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: _mutedText)),
+          ),
           TextButton(
             onPressed: () async {
               try {
-                await _firestore.collection('public_polls').doc(pollId).delete();
+                await _firestore
+                    .collection('public_polls')
+                    .doc(pollId)
+                    .delete();
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Poll deleted')));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Poll deleted')));
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: $e')));
               }
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.redAccent),
+            ),
           ),
         ],
       ),
@@ -860,15 +1273,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _glowOrb(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withOpacity(0.25),
-        boxShadow: [
-          BoxShadow(color: color.withOpacity(0.4), blurRadius: 120, spreadRadius: 40),
-        ],
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(0.12),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.14),
+              blurRadius: 52,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
       ),
     );
   }

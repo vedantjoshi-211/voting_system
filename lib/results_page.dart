@@ -13,12 +13,22 @@ class ResultsPage extends StatefulWidget {
 class _ResultsPageState extends State<ResultsPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  static const Color gradientStart = Color(0xFF6C7CFF);
+  static const Color gradientEnd = Color(0xFF4DD0E1);
+  static const Color pageTop = Color(0xFF0B1020);
+  static const Color pageMid = Color(0xFF121A3A);
+  static const Color pageBottom = Color(0xFF1B255A);
+  static const Color glassText = Color(0xFFF5F7FB);
+  static const Color glassSubtext = Color(0xFFB9C6DD);
+  static const Color glassSurface = Color(0xFFF5F7FB);
 
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.forward();
@@ -34,7 +44,7 @@ class _ResultsPageState extends State<ResultsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1020),
+      backgroundColor: pageTop,
       appBar: AppBar(
         title: const Text('Results & Reports'),
         centerTitle: true,
@@ -42,7 +52,10 @@ class _ResultsPageState extends State<ResultsPage>
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         titleTextStyle: const TextStyle(
-            color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
       body: Stack(
@@ -53,24 +66,16 @@ class _ResultsPageState extends State<ResultsPage>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF0B1020),
-                  Color(0xFF121A3A),
-                  Color(0xFF1B255A),
-                ],
+                colors: [pageTop, pageMid, pageBottom],
               ),
             ),
           ),
 
-          Positioned(
-            top: -60,
-            left: -40,
-            child: _glowOrb(160, const Color(0xFF6C7CFF)),
-          ),
+          Positioned(top: -60, left: -40, child: _glowOrb(160, gradientStart)),
           Positioned(
             bottom: -80,
             right: -60,
-            child: _glowOrb(200, const Color(0xFF4DD0E1)),
+            child: _glowOrb(200, gradientEnd),
           ),
 
           SafeArea(
@@ -84,8 +89,11 @@ class _ResultsPageState extends State<ResultsPage>
                 builder: (context, snap) {
                   if (snap.hasError) {
                     return Center(
-                        child: Text('Error: ${snap.error}',
-                            style: const TextStyle(color: Colors.white70)));
+                      child: Text(
+                        'Error: ${snap.error}',
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                    );
                   }
                   if (snap.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -96,17 +104,20 @@ class _ResultsPageState extends State<ResultsPage>
                   docs.sort((a, b) {
                     final ta =
                         (a.data()['createdAt'] as Timestamp?)?.toDate() ??
-                            DateTime.fromMillisecondsSinceEpoch(0);
+                        DateTime.fromMillisecondsSinceEpoch(0);
                     final tb =
                         (b.data()['createdAt'] as Timestamp?)?.toDate() ??
-                            DateTime.fromMillisecondsSinceEpoch(0);
+                        DateTime.fromMillisecondsSinceEpoch(0);
                     return tb.compareTo(ta);
                   });
 
                   if (docs.isEmpty) {
                     return const Center(
-                        child: Text('No published results yet',
-                            style: TextStyle(color: Colors.white70)));
+                      child: Text(
+                        'No published results yet',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    );
                   }
 
                   return ListView.separated(
@@ -116,15 +127,14 @@ class _ResultsPageState extends State<ResultsPage>
                       final data = docs[index].data();
                       final electionId = docs[index].id;
                       final title = (data['title'] ?? 'Untitled').toString();
-                      final description =
-                          (data['description'] ?? '').toString();
+                      final description = (data['description'] ?? '')
+                          .toString();
                       final candidatesData =
                           (data['candidates'] as List?)
-                                  ?.cast<Map<String, dynamic>>() ??
-                              [];
+                              ?.cast<Map<String, dynamic>>() ??
+                          [];
 
-                      return StreamBuilder<
-                          QuerySnapshot<Map<String, dynamic>>>(
+                      return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                         stream: FirebaseFirestore.instance
                             .collection('votes')
                             .where('electionId', isEqualTo: electionId)
@@ -135,8 +145,9 @@ class _ResultsPageState extends State<ResultsPage>
 
                           if (voteSnap.hasData) {
                             for (var vote in voteSnap.data!.docs) {
-                              final candidateId =
-                                  vote.data()['candidateId']?.toString();
+                              final candidateId = vote
+                                  .data()['candidateId']
+                                  ?.toString();
 
                               if (candidateId != null &&
                                   candidateId.isNotEmpty) {
@@ -150,8 +161,7 @@ class _ResultsPageState extends State<ResultsPage>
                           final candidateList = <Map<String, dynamic>>[];
 
                           for (var candidate in candidatesData) {
-                            final candId =
-                                candidate['candidateId']?.toString();
+                            final candId = candidate['candidateId']?.toString();
                             final candName =
                                 candidate['name']?.toString() ?? 'Unknown';
 
@@ -174,79 +184,97 @@ class _ResultsPageState extends State<ResultsPage>
 
                           final winners = maxVotes > 0
                               ? candidateList
-                                  .where((c) =>
-                                      (c['votes'] ?? 0) as int == maxVotes)
-                                  .toList()
+                                    .where(
+                                      (c) =>
+                                          (c['votes'] ?? 0) as int == maxVotes,
+                                    )
+                                    .toList()
                               : [];
 
                           return ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: BackdropFilter(
-                              filter:
-                                  ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                               child: Container(
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF5F7FB)
-                                      .withOpacity(0.94),
+                                  color: glassSurface.withOpacity(0.10),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                      color: Colors.white.withOpacity(0.28)),
+                                    color: Colors.white.withOpacity(0.22),
+                                  ),
                                 ),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(title,
-                                        style: const TextStyle(
-                                            color: Color(0xFF0B1020),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w800)),
+                                    Text(
+                                      title,
+                                      style: const TextStyle(
+                                        color: glassText,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
                                     const SizedBox(height: 6),
-                                    Text(description,
-                                        style: const TextStyle(
-                                            color: Color(0xFF6B7A90),
-                                            fontSize: 13)),
+                                    Text(
+                                      description,
+                                      style: const TextStyle(
+                                        color: glassSubtext,
+                                        fontSize: 13,
+                                      ),
+                                    ),
                                     const SizedBox(height: 12),
 
                                     /// RESULT BANNER
                                     if (maxVotes == 0) ...[
                                       const Padding(
-                                        padding:
-                                            EdgeInsets.symmetric(vertical: 6),
-                                        child: Text('No votes cast',
-                                            style: TextStyle(
-                                                color: Color(0xFF6B7A90),
-                                                fontSize: 13)),
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 6,
+                                        ),
+                                        child: Text(
+                                          'No votes cast',
+                                          style: TextStyle(
+                                            color: glassSubtext,
+                                            fontSize: 13,
+                                          ),
+                                        ),
                                       ),
                                     ] else if (winners.length == 1) ...[
                                       Container(
                                         margin: const EdgeInsets.symmetric(
-                                            vertical: 8),
+                                          vertical: 8,
+                                        ),
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 12, horizontal: 12),
+                                          vertical: 12,
+                                          horizontal: 12,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: Colors.green
-                                              .withOpacity(0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          color: Colors.green.withOpacity(0.14),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                           border: Border.all(
-                                              color: Colors.green),
+                                            color: Colors.green.withOpacity(
+                                              0.65,
+                                            ),
+                                          ),
                                         ),
                                         child: Row(
                                           children: [
-                                            const Icon(Icons.emoji_events,
-                                                color: Colors.green,
-                                                size: 24),
+                                            const Icon(
+                                              Icons.emoji_events,
+                                              color: Color(0xFF80FF9E),
+                                              size: 24,
+                                            ),
                                             const SizedBox(width: 12),
                                             Expanded(
                                               child: Text(
                                                 'WINNER: ${winners[0]['name']?.toString().toUpperCase() ?? "UNKNOWN"}',
                                                 style: const TextStyle(
-                                                    color: Color(0xFF0B1020),
-                                                    fontWeight:
-                                                        FontWeight.w900,
-                                                    fontSize: 16),
+                                                  color: Color(0xFF80FF9E),
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 16,
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -255,32 +283,37 @@ class _ResultsPageState extends State<ResultsPage>
                                     ] else if (winners.length > 1) ...[
                                       Container(
                                         margin: const EdgeInsets.symmetric(
-                                            vertical: 8),
+                                          vertical: 8,
+                                        ),
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 12, horizontal: 12),
+                                          vertical: 12,
+                                          horizontal: 12,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color:
-                                              Colors.red.withOpacity(0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border:
-                                              Border.all(color: Colors.red),
+                                          color: Colors.red.withOpacity(0.14),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.red.withOpacity(0.70),
+                                          ),
                                         ),
                                         child: Row(
                                           children: [
                                             const Icon(
-                                                Icons.warning_amber,
-                                                color: Colors.red,
-                                                size: 24),
+                                              Icons.warning_amber,
+                                              color: Color(0xFFFFA6A6),
+                                              size: 24,
+                                            ),
                                             const SizedBox(width: 12),
                                             Expanded(
                                               child: Text(
                                                 'TIE: ${winners.map((w) => w['name']).join(', ').toUpperCase()}',
                                                 style: const TextStyle(
-                                                    color: Color(0xFF0B1020),
-                                                    fontWeight:
-                                                        FontWeight.w900,
-                                                    fontSize: 14),
+                                                  color: Color(0xFFFFA6A6),
+                                                  fontWeight: FontWeight.w900,
+                                                  fontSize: 14,
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -289,23 +322,29 @@ class _ResultsPageState extends State<ResultsPage>
                                     ],
 
                                     const SizedBox(height: 8),
-                                    const Text('Vote Count:',
-                                        style: TextStyle(
-                                            color: Color(0xFF0B1020),
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12)),
+                                    const Text(
+                                      'Vote Count:',
+                                      style: TextStyle(
+                                        color: glassText,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                     const SizedBox(height: 8),
 
                                     ...candidateList.map((c) {
                                       final candVotes =
                                           (c['votes'] ?? 0) as int;
-                                      final isWinner = winners.any((w) =>
-                                          w['candidateId'] ==
-                                          c['candidateId']);
+                                      final isWinner = winners.any(
+                                        (w) =>
+                                            w['candidateId'] ==
+                                            c['candidateId'],
+                                      );
 
                                       return Padding(
                                         padding: const EdgeInsets.symmetric(
-                                            vertical: 5),
+                                          vertical: 5,
+                                        ),
                                         child: Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
@@ -315,9 +354,8 @@ class _ResultsPageState extends State<ResultsPage>
                                                 c['name'] ?? 'Unknown',
                                                 style: TextStyle(
                                                   color: isWinner
-                                                      ? Colors.green
-                                                      : const Color(
-                                                          0xFF0B1020),
+                                                      ? const Color(0xFF80FF9E)
+                                                      : glassText,
                                                   fontWeight: isWinner
                                                       ? FontWeight.w800
                                                       : FontWeight.w600,
@@ -329,11 +367,9 @@ class _ResultsPageState extends State<ResultsPage>
                                               '$candVotes',
                                               style: TextStyle(
                                                 color: isWinner
-                                                    ? Colors.green
-                                                    : const Color(
-                                                        0xFF6B7A90),
-                                                fontWeight:
-                                                    FontWeight.w700,
+                                                    ? const Color(0xFF80FF9E)
+                                                    : glassSubtext,
+                                                fontWeight: FontWeight.w700,
                                                 fontSize: 14,
                                               ),
                                             ),
@@ -360,18 +396,21 @@ class _ResultsPageState extends State<ResultsPage>
   }
 
   Widget _glowOrb(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withOpacity(0.22),
-        boxShadow: [
-          BoxShadow(
-              color: color.withOpacity(0.36),
-              blurRadius: 120,
-              spreadRadius: 36)
-        ],
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(0.12),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.14),
+              blurRadius: 52,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
       ),
     );
   }
