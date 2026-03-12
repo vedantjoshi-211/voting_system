@@ -186,6 +186,8 @@ class _ElectionsPageState extends State<ElectionsPage> {
     required String description,
     required List<Map<String, dynamic>> candidates,
   }) {
+    final userId = _auth.currentUser?.uid;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -224,56 +226,195 @@ class _ElectionsPageState extends State<ElectionsPage> {
                 style: const TextStyle(color: glassSubtext, fontSize: 13),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Select Candidate:',
-                style: TextStyle(
-                  color: glassText,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 12),
 
-              ...candidates.map((candidate) {
-                return GestureDetector(
-                  onTap: () {
-                    _handleVote(
-                      electionId,
-                      candidate['candidateId'].toString(),
-                      candidate['name'].toString(),
+              FutureBuilder<bool>(
+                future: userId == null
+                    ? Future.value(false)
+                    : _firestore
+                        .collection('votes')
+                        .where('userId', isEqualTo: userId)
+                        .where('electionId', isEqualTo: electionId)
+                        .limit(1)
+                        .get()
+                        .then((snap) => snap.docs.isNotEmpty),
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Center(child: CircularProgressIndicator()),
                     );
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.white.withOpacity(0.16)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  }
+
+                  final hasVoted = snap.data ?? false;
+
+                  if (hasVoted) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            candidate['name'] ?? 'Unknown',
-                            style: const TextStyle(
-                              color: glassText,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.greenAccent.withOpacity(0.10),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.greenAccent.withOpacity(0.35)),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.check_circle_outline, color: Colors.greenAccent, size: 20),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'You have already voted in this election',
+                                  style: TextStyle(
+                                    color: Colors.greenAccent,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14,
-                          color: glassSubtext,
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Candidates:',
+                          style: TextStyle(
+                            color: glassText,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
+                        const SizedBox(height: 12),
+                        ...candidates.map((candidate) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.04),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.white.withOpacity(0.10)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.person_outline, size: 16, color: glassSubtext),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    candidate['name'] ?? 'Unknown',
+                                    style: const TextStyle(
+                                      color: glassSubtext,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
                       ],
-                    ),
-                  ),
-                );
-              }).toList(),
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Select Candidate:',
+                        style: TextStyle(
+                          color: glassText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ...candidates.map((candidate) {
+                        return GestureDetector(
+                          onTap: () async {
+                            final candidateName = candidate['name'].toString();
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: const Color(0xFF1B255A),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                title: const Text(
+                                  'Confirm Vote',
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                ),
+                                content: Text(
+                                  'You are voting for $candidateName',
+                                  style: const TextStyle(color: Color(0xFFB9C6DD), fontSize: 15),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(ctx).pop(false),
+                                    child: const Text(
+                                      'Cancel',
+                                      style: TextStyle(color: Color(0xFFB9C6DD)),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF6C7CFF),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    onPressed: () => Navigator.of(ctx).pop(true),
+                                    child: const Text(
+                                      'Yes, Vote',
+                                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirmed == true) {
+                              _handleVote(
+                                electionId,
+                                candidate['candidateId'].toString(),
+                                candidateName,
+                              );
+                            }
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.06),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.white.withOpacity(0.16)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    candidate['name'] ?? 'Unknown',
+                                    style: const TextStyle(
+                                      color: glassText,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 14,
+                                  color: glassSubtext,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
         ),

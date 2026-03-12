@@ -110,6 +110,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _bgTop,
       body: Stack(
         children: [
           // Background

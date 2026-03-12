@@ -278,6 +278,76 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
                   const SizedBox(height: 28),
 
+                  // Announcements header
+                  const Text(
+                    'Announcements',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Announcements ListView
+                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: _firestore
+                        .collection('announcements')
+                        .orderBy('createdAt', descending: true)
+                        .snapshots(),
+                    builder: (context, snap) {
+                      if (snap.hasError) {
+                        return Center(
+                          child: Text(
+                            'Error: \${snap.error}',
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        );
+                      }
+                      if (snap.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      final docs = snap.data?.docs ?? [];
+                      if (docs.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No announcements yet',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        );
+                      }
+
+                      return ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          final data = docs[index].data();
+                          final announcementId = docs[index].id;
+                          final title = (data['title'] ?? 'Untitled').toString();
+                          final message = (data['message'] ?? '').toString();
+
+                          return _announcementManagementCard(
+                            announcementId: announcementId,
+                            title: title,
+                            message: message,
+                            onEdit: () {
+                              _showEditAnnouncementDialog(announcementId, data);
+                            },
+                            onDelete: () {
+                              _showDeleteAnnouncementConfirmation(announcementId);
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 28),
+
                   // Public Polls header
                   const Text(
                     'Public Polls',
@@ -1126,6 +1196,246 @@ class _AdminDashboardState extends State<AdminDashboard> {
       focusedBorder: const OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide(color: Color(0xFF4DD0E1), width: 1.3),
+      ),
+    );
+  }
+
+  Widget _announcementManagementCard({
+    required String announcementId,
+    required String title,
+    required String message,
+    required VoidCallback onEdit,
+    required VoidCallback onDelete,
+  }) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: _glassSurface.withOpacity(0.10),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.22),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.20),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: _panelText,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (message.isNotEmpty) ...
+                [
+                  const SizedBox(height: 6),
+                  Text(
+                    message,
+                    style: const TextStyle(color: _mutedText, fontSize: 13),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: onEdit,
+                        icon: const Icon(Icons.edit, size: 18, color: Colors.white),
+                        label: const Text(
+                          'Edit',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6C7CFF),
+                          elevation: 0,
+                          side: BorderSide(
+                            color: Colors.white.withOpacity(0.22),
+                            width: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SizedBox(
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: onDelete,
+                        icon: const Icon(Icons.delete, size: 18, color: Colors.white),
+                        label: const Text(
+                          'Delete',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          elevation: 0,
+                          side: BorderSide(
+                            color: Colors.white.withOpacity(0.22),
+                            width: 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showEditAnnouncementDialog(String announcementId, Map<String, dynamic> data) {
+    final titleController = TextEditingController(text: data['title']);
+    final messageController = TextEditingController(text: data['message']);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: const Text(
+          'Edit Announcement',
+          style: TextStyle(color: _panelText),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Title'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: messageController,
+                style: const TextStyle(color: _panelText),
+                decoration: _inputDecoration('Message'),
+                maxLines: 4,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: _mutedText)),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (titleController.text.isEmpty || messageController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Fill all fields')),
+                );
+                return;
+              }
+              try {
+                await _firestore
+                    .collection('announcements')
+                    .doc(announcementId)
+                    .update({
+                      'title': titleController.text,
+                      'message': messageController.text,
+                    });
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Announcement updated')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: \$e')));
+              }
+            },
+            child: const Text('Update', style: TextStyle(color: _panelText)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAnnouncementConfirmation(String announcementId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF121A3A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.22), width: 1),
+        ),
+        title: const Text(
+          'Delete Announcement',
+          style: TextStyle(color: _panelText),
+        ),
+        content: const Text(
+          'Are you sure you want to delete this announcement?',
+          style: TextStyle(color: _mutedText),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: _mutedText)),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await _firestore
+                    .collection('announcements')
+                    .doc(announcementId)
+                    .delete();
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Announcement deleted')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Error: \$e')));
+              }
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        ],
       ),
     );
   }

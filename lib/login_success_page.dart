@@ -16,6 +16,7 @@ class LoginSuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: _bgTop,
       body: Stack(
         children: [
           // 🔥 Gradient background
