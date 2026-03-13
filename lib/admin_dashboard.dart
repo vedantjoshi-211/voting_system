@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_page.dart';
+import 'create_election_page.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -87,7 +88,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     width: double.infinity,
                     height: 54,
                     child: ElevatedButton.icon(
-                      onPressed: _showCreateElectionDialog,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CreateElectionPage(),
+                          ),
+                        );
+                      },
                       icon: const Icon(
                         Icons.add,
                         color: Colors.white,
