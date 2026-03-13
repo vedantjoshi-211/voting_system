@@ -132,7 +132,7 @@ class _PublicPollsPageState extends State<PublicPollsPage> {
       return true;
     } catch (e) {
       final message = e is StateError
-          ? e.message?.toString() ?? 'Unable to record vote.'
+          ? e.message.toString() ?? 'Unable to record vote.'
           : 'Error: $e';
 
       if (mounted) {

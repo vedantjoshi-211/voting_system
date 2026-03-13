@@ -886,7 +886,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: selectedStatus,
+                initialValue: selectedStatus,
                 items: ['upcoming', 'active', 'completed']
                     .map(
                       (status) => DropdownMenuItem(
@@ -999,7 +999,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: selectedStatus,
+                initialValue: selectedStatus,
                 items: ['upcoming', 'active', 'completed']
                     .map(
                       (status) => DropdownMenuItem(

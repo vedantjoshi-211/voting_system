@@ -155,7 +155,7 @@ class MyVotesPage extends StatelessWidget {
                                       (candidateId ?? ''),
                                   orElse: () => {},
                                 );
-                            if (found is Map && found.containsKey('name'))
+                            if (found.containsKey('name'))
                               candidateName = (found['name'] ?? '').toString();
                           }
 
